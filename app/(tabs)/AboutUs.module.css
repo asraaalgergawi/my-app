@@ -1,0 +1,99 @@
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;  /* Apply Roboto font */
+  background-color: #f4e1c1;  /* Light sandy background */
+  color: #3d2c1d;  /* Dark brown text color for better readability */
+  overflow-x: hidden;
+  overflow: auto; /* Allows scrolling */
+
+}
+
+/* Main Container */
+.container {
+  min-height: 100%;
+  padding: 40px;
+  background-color: #fff7e1;  /* Lighter background for readability */
+  overflow: auto; /* Allows scrolling if content exceeds the viewport */
+
+}
+
+/* Header Section */
+.header {
+  text-align: center;
+  margin-bottom: 50px;
+  font-family: 'Merriweather', serif;  /* Apply Merriweather for headers */
+}
+
+.header h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #6d4c41;  /* Dark brown */
+  text-transform: uppercase;
+}
+
+.header p {
+  font-size: 1.2rem;
+  color: #3d2c1d;
+  margin-top: 10px;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 2.5rem;
+  color: #6d4c41;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-transform: capitalize;
+}
+
+/* Text Content */
+.text {
+  font-size: 1.15rem;
+  color: #3d2c1d;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* List Styles */
+.list, .ordered-list {
+  margin-left: 20px;
+  font-size: 1.1rem;
+  color: #3d2c1d;
+}
+
+.list li, .ordered-list li {
+  margin-bottom: 10px;
+}
+
+/* Contact Section */
+.contact {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.contact a {
+  color: #8c4b2f;  /* A softer brown */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contact a:hover {
+  text-decoration: underline;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  .header h1 {
+      font-size: 2.5rem;
+  }
+
+  .section-title {
+      font-size: 2rem;
+  }
+
+  .text {
+      font-size: 1rem;
+  }
+}
