@@ -4,6 +4,7 @@ const multer = require('multer');
 const cors = require('cors');
 const { Update } = require('./models/Update'); // Assuming you have a defined Update model
 require('dotenv').config();
+app.use("/uploads", express.static("uploads"));
 
 const app = express();
 
