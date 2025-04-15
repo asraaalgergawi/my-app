@@ -34,7 +34,7 @@ const SubmitUpdate: React.FC = () => {
     images.forEach((image) => formData.append('images', image)); // Append files
 
     try {
-      await axios.post('http://localhost:8082/api/submitUpdate', formData, {
+      await axios.post('http://localhost:8081/api/submitUpdate', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
