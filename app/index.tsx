@@ -59,7 +59,7 @@ const IndexPage: React.FC = () => {
             />
             <div className="village-info">
               <h2>{village.name}</h2>
-              <p>{village.description}</p>
+              
             </div>
           </Link>
         ))}

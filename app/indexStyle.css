@@ -1,9 +1,12 @@
 html, body {
-  height: 100%;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  height: auto;
+  min-height: 400vh;
+  overflow-y: auto;
 }
+
 
 .container {
   min-height: 100vh;

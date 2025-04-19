@@ -144,7 +144,7 @@ app.post('/api/addVillage', async (req, res) => {
     try {
         const { name, description, imageUrl } = req.body;
         
-        // Add validation
+        // Validate required fields
         if (!name || !description) {
             return res.status(400).json({ error: "Name and description are required" });
         }
@@ -152,13 +152,13 @@ app.post('/api/addVillage', async (req, res) => {
         const newVillage = new Village({
             name,
             description,
-            image: imageUrl || 'https://via.placeholder.com/300x200?text=No+Image',
+            images: imageUrl ? [imageUrl] : ['https://via.placeholder.com/300x200?text=No+Image'],
             location: {
                 type: 'Point',
                 coordinates: [0, 0]
             }
         });
-  
+
         await newVillage.save();
         res.status(201).json(newVillage);
     } catch (error) {
