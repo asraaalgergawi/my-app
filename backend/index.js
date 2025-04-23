@@ -1,52 +1,75 @@
-require('dotenv').config(); // Adjust the path as needed
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const multer = require('multer');
+//const multer = require('multer');
 const path = require('path');
 const { User } = require('./models/User');
-const { Update } = require('./models/Update'); // Correct import
+const { Update } = require('./models/Update');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
-const landmarksRoute = require('./routes/landmarks'); // راوت اللاند ماركس
-
-const updateRoute = require('./routes/Update'); // Import the update route
+const villageRoutes = require('./routes/village');
+const updateRoute = require('./routes/Update');
 const usersRoutes = require('./routes/users');
+const Village = require('./models/Village');
 
 const app = express();
 
+// Configure Multer
+/*
 const uploadPath = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath);
+    fs.mkdirSync(uploadPath, { recursive: true });
 }
+    
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, `village-${uniqueSuffix}${path.extname(file.originalname)}`);
+    }
+});
+*/
+// Single CORS configuration
+// Replace the current CORS configuration with:
+// Replace your current CORS middleware with:
+const corsOptions = {
+    origin: ['http://localhost:8082'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
 
 // Middleware
-app.use(cors({ origin: true, credentials: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Define the storage configuration for Multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'uploads'));
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${file.originalname}`;
-        cb(null, `images-${uniqueSuffix}`);
-    },
+// Static files with CORS headers
+//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use((req, res, next) => {
+  res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
 });
-const criticalRoadsRoute = require('./routes/criticalRoads');
-app.use('/api', criticalRoadsRoute);
+app.use('/frontend/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
-const upload = multer({ storage }); // Ensure this is defined only once
+// Routes
+app.use('/api/villages', villageRoutes);
+app.use('/api/updates', updateRoute);
+app.use('/api/users', usersRoutes);
 
-// Remove the duplicate POST /api/signup route
+//const upload = multer({ storage });
+
 app.post("/api/signup", async (req, res) => {
     try {
         const { name, email, password, confirmPassword, role } = req.body;
 
-        // Validate input
         if (!name || !email || !password || !confirmPassword || !role) {
             return res.status(400).json({ message: "All fields are required" });
         }
@@ -54,16 +77,12 @@ app.post("/api/signup", async (req, res) => {
             return res.status(400).json({ message: "Passwords do not match" });
         }
 
-        // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "Email already registered" });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create new user
         const newUser = new User({
             name,
             email,
@@ -72,7 +91,6 @@ app.post("/api/signup", async (req, res) => {
         });
 
         await newUser.save();
-
         res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
         console.error("Signup error:", error);
@@ -80,14 +98,9 @@ app.post("/api/signup", async (req, res) => {
     }
 });
 
-// Submit update route
-app.post('/api/submitUpdate', upload.array('images', 10), async (req, res) => {
+app.post('/api/submitUpdate', async (req, res) => {
     try {
-        console.log('Request body:', req.body);
-        console.log('Uploaded files:', req.files);
-
-        const { firstName, lastName, villageName, updateType, description } = req.body;
-        const imagePaths = req.files.map(file => file.path);
+        const { firstName, lastName, villageName, updateType, description, imageUrls } = req.body;
 
         const newUpdate = new Update({
             firstName,
@@ -95,18 +108,17 @@ app.post('/api/submitUpdate', upload.array('images', 10), async (req, res) => {
             villageName,
             updateType,
             description,
-            images: imagePaths,
-          });
-          await newUpdate.save();
-          
+            images: imageUrls, // Now expects an array of URLs
+        });
+        
+        await newUpdate.save();
         res.status(201).json({ message: 'Update submitted successfully!', update: newUpdate });
     } catch (error) {
-        console.error('Error while handling request:', error);
+        console.error('Error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
-// New route to test adding a user
 app.get('/api/test-user', async (req, res) => {
     try {
         await addTestUser();
@@ -116,11 +128,63 @@ app.get('/api/test-user', async (req, res) => {
     }
 });
 
+app.get('/api/villages/:id', async (req, res) => {
+    try {
+      const village = await Village.findById(req.params.id);
+      if (!village) {
+        return res.status(404).json({ message: 'Village not found' });
+      }
+      res.json(village);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+app.post('/api/addVillage', async (req, res) => {
+    try {
+        const { name, description, imageUrl } = req.body;
+        
+        // Validate required fields
+        if (!name || !description) {
+            return res.status(400).json({ error: "Name and description are required" });
+        }
+
+        const newVillage = new Village({
+            name,
+            description,
+            images: imageUrl ? [imageUrl] : ['https://via.placeholder.com/300x200?text=No+Image'],
+            location: {
+                type: 'Point',
+                coordinates: [0, 0]
+            }
+        });
+
+        await newVillage.save();
+        res.status(201).json(newVillage);
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ 
+            error: "Failed to save village",
+            details: error.message 
+        });
+    }
+});
+
+
+app.get('/api/villages', async (req, res) => {
+  try {
+    const villages = await Village.find();
+    res.status(200).json(villages);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching villages', error: error.message });
+  }
+});
+
 mongoose.connect(process.env.DB)
     .then(() => { console.log('MongoDB connected successfully'); })
     .catch((err) => console.error('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 8082;
+const PORT = process.env.PORT || 8081;
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

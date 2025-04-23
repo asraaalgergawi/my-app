@@ -34,7 +34,7 @@ const Signup = () => {
     }
 
     try {
-      const url = `http://localhost:8082/api/signup`;
+      const url = `http://localhost:8081/api/signup`;
       const { data: res } = await axios.post(url, data);
       try {
         await emailjs.send(
