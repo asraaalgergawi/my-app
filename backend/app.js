@@ -51,7 +51,35 @@ app.post('/api/submitUpdate', upload.array('images', 10), async (req, res) => {
     res.status(500).json({ message: 'Error saving update', error });
   }
 });
+app.post("/api/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user) return res.status(404).send({ message: "User not found" });
 
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) return res.status(400).send({ message: "Invalid password" });
+
+    // إرجاع بيانات المستخدم بما فيها role
+    res.status(200).send({
+      message: "Logged in successfully",
+      role: user.role,
+      userId: user._id
+    });
+  } catch (error) {
+    res.status(500).send({ message: "Server error" });
+  }
+});
+// New route to test adding a user
+app.get('/api/test-user', async (req, res) => {
+  try {
+      await addTestUser();
+      res.status(200).send('Test user added successfully!');
+  } catch (error) {
+      res.status(500).send('Error adding test user.');
+  }
+});
 // Start the server
 const PORT = process.env.PORT || 8082;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
