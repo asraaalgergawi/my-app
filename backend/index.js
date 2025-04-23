@@ -25,7 +25,6 @@ app.use(cors({ origin: true, credentials: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api/landmarks', landmarksRoute);
 
 // Define the storage configuration for Multer
 const storage = multer.diskStorage({
@@ -37,6 +36,8 @@ const storage = multer.diskStorage({
         cb(null, `images-${uniqueSuffix}`);
     },
 });
+const criticalRoadsRoute = require('./routes/criticalRoads');
+app.use('/api', criticalRoadsRoute);
 
 const upload = multer({ storage }); // Ensure this is defined only once
 

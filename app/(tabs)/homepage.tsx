@@ -205,6 +205,41 @@ const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${startPoint.lo
     // Navigate to the landmarks route
     router.push('/landmarks');
   };
+  const handleShowCriticalRoads = async () => {
+    try {
+      const response = await axios.get('http://localhost:8082/api/critical-roads'); // replace with your route
+      const csvData = response.data;
+  
+      const lines = csvData.split('\n').filter((line: string) => line.trim() !== '');
+      const lat: number[] = [];
+      const lon: number[] = [];
+  
+      for (let i = 1; i < lines.length; i++) { // Skip header if present
+        const [latitude, longitude] = lines[i].split(',').map(Number);
+        if (!isNaN(latitude) && !isNaN(longitude)) {
+          lat.push(latitude);
+          lon.push(longitude);
+        }
+      }
+  
+      const criticalRoadTrace = {
+        type: "scattermapbox",
+        lat,
+        lon,
+        mode: "lines",
+        line: { width: 4, color: "orange" },
+        name: "Critical Road"
+      };
+  
+      if (mapRef.current && window.Plotly) {
+        window.Plotly.addTraces(mapRef.current, [criticalRoadTrace]);
+      }
+    } catch (error) {
+      console.error("Error loading critical roads:", error);
+      alert("Failed to load critical roads.");
+    }
+  };
+  
   return (
     <div className="homepage-container">
       <div className="left-container">
@@ -241,7 +276,8 @@ const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${startPoint.lo
   Add New Landmark
 </button>
 
-       
+<button onClick={handleShowCriticalRoads}>Show Critical Roads</button>
+
         {routeDetails && (
           <div className="route-details">
             <p>Distance: {routeDetails.distance}</p>
