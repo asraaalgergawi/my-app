@@ -7,9 +7,44 @@ html, body {
   overflow-y: auto;
 }
 
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #fff8f1;
+  border-bottom: 1px solid #ddd;
+}
+
+.leftButtonContainer {
+  display: flex;
+  gap: 10px;
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #a97435;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #8a5a29;
+}
 
 .container {
-  min-height: 100vh;
+  flex: 1;
   padding: 2rem;
   font-family: Arial, sans-serif;
   background-color: #ffffff;
